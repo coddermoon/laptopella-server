@@ -10,7 +10,7 @@ const app = express();
 // middlewares
 app.use(cors());
 app.use(express.json());
-
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 // mongo connection string
 const uri = process.env.DB_URL
 // connection mongodb 
@@ -21,6 +21,7 @@ const run = async()=>{
     try{
 const productsCollection = client.db('laptopella').collection('products')
 const usersCollection = client.db('laptopella').collection('users')
+const paymentsCollection = client.db('laptopella').collection('payment')
 
 
 // handle users collection
@@ -35,6 +36,17 @@ app.post('/users',async(req,res)=>{
 
    
 })
+
+// admin route
+app.get('/users/admin/:email', async (req, res) => {
+    const email = req.params.email;
+    const query = { email }
+    const user = await usersCollection.findOne(query);
+    res.send({ isAdmin: user?.accountType === 'admin' });
+})
+
+
+
 
 
 app.get('/products',async(req,res)=>{
@@ -58,8 +70,31 @@ app.get(`/category`,async(req,res)=>{
     const categoriesData = products.map(product=>product.productInfo.brand)
 
    res.send(categoriesData)
-    return
+    
 })
+
+// create a payment intent
+
+app.post('/create-payment-intent',async(req,res)=>{
+  const price = req.body.price.resalePrice
+
+  const amount = price * 100
+
+  const paymentIntent = await stripe.paymentIntents.create({
+   
+    currency: "usd",
+    amount: amount,
+   "payment_method_types": [
+      "card"
+ 
+   ]
+   
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+})
+
 
        
     }finally{
