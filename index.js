@@ -35,6 +35,16 @@ app.get(`/products/:id`,async(req,res)=>{
     const product = await productsCollection.findOne(query)
     res.send(product)
 })
+// fetch to category
+app.get(`/category`,async(req,res)=>{
+    
+    const query = {}
+    const products = await productsCollection.find(query).toArray()
+    const categoriesData = products.map(product=>product.productInfo.brand)
+
+   res.send(categoriesData)
+    return
+})
 
        
     }finally{
