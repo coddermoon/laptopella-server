@@ -1,5 +1,5 @@
 // dependencies
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 
@@ -19,14 +19,29 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 const run = async()=>{
     try{
+const productsCollection = client.db('laptopella').collection('products')
 
+
+app.get('/products',async(req,res)=>{
+    const query = {}
+    const products = await productsCollection.find(query).toArray()
+    res.send(products)
+})
+
+// find product with specific id
+app.get(`/products/:id`,async(req,res)=>{
+    const id = req.params.id
+    const query = {_id:ObjectId(id)}
+    const product = await productsCollection.findOne(query)
+    res.send(product)
+})
 
        
     }finally{
 
     }
 }
-run().catch((err)=>console.error(err.message))
+run().catch(console.dir)
 
 app.get('/', (req, res) => {
     res.send('running server');
