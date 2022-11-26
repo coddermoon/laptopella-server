@@ -53,7 +53,10 @@ app.get('/users/admin/:email', async (req, res) => {
     const email = req.params.email;
     const query = { email }
     const user = await usersCollection.findOne(query);
-    res.send({ isAdmin: user?.accountType === 'admin' });
+   const accountType = {accountType:user.accountType}
+    
+
+    res.send(accountType);
 })
 
 
