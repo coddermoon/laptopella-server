@@ -38,6 +38,16 @@ app.post('/users',async(req,res)=>{
    
 })
 
+// find orders collection 
+
+app.get('/orders',async(req,res)=>{
+    const query = {}
+    const result = await ordersCollection.find(query).toArray()
+    res.send(result)
+
+
+})
+
 // admin route
 app.get('/users/admin/:email', async (req, res) => {
     const email = req.params.email;
@@ -116,10 +126,11 @@ app.post('/payments',async(req,res)=>{
        
     }
     const orders = {
+        productName : payment.name,
         paymentStatus : true,
         transactionId: payment.transactionId,
         email: payment.email,
-        productId : payment.product_Id,
+        productId : id,
         sellStatus:"sold",
         price : payment.price 
     }
