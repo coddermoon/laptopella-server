@@ -95,7 +95,26 @@ app.post('/create-payment-intent',async(req,res)=>{
   });
 })
 
+// payment data stored in database
 
+app.post('/payments',async(req,res)=>{
+    const payment = req.body
+
+    // inject data in payment collectioon
+
+    const id = payment.product_id
+    const filter = {_id: ObjectId(id)}
+    const result = await paymentsCollection.insertOne(payment)
+    const updatedDoc = {
+        $set:{
+            paymentStatus : true,
+            transactionId: payment.transactionId
+        }
+    }
+const updatedResult = await productsCollection.updateOne(filter, updatedDoc)
+    
+    res.send(result)
+})
        
     }finally{
 
