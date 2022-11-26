@@ -29,6 +29,18 @@ const ordersCollection = client.db('laptopella').collection('orders')
 
 // post user data in database
 
+app.get('/allUsers', async(req,res)=>{
+    const accountType = req.query.AccountType
+    const query = {accountType: accountType}
+    console.log(query)
+    const result = await usersCollection.find(query).toArray()
+    res.send(result)
+
+})
+
+
+
+
 app.post('/users',async(req,res)=>{
     const user = req.body
     const result =await usersCollection.insertOne(user)
