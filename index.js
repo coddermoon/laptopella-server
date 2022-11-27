@@ -2,7 +2,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
-
+const jwt = require('jsonwebtoken')
 const port = process.env.PORT || 5000
 
 require('dotenv').config()
@@ -15,7 +15,25 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const uri = process.env.DB_URL
 // connection mongodb 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+// jsonWeb token verify
+const  verifyJWT=(req, res, next)=> {
 
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send('unauthorized access');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden access' })
+        }
+        req.decoded = decoded;
+        next();
+    })
+
+}
 
 const run = async()=>{
     try{
@@ -24,6 +42,14 @@ const usersCollection = client.db('laptopella').collection('users')
 const paymentsCollection = client.db('laptopella').collection('payment')
 const ordersCollection = client.db('laptopella').collection('orders')
 
+// json web token for secure my site 
+app.post('/jwt', (req, res) =>{
+    const user = req.body;
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d'})
+    console.log({token})
+   res.send({token})
+    
+})
 
 // handle users collection
 
@@ -32,7 +58,7 @@ const ordersCollection = client.db('laptopella').collection('orders')
 app.get('/allUsers', async(req,res)=>{
     const accountType = req.query.AccountType
     const query = {accountType: accountType}
-    console.log(query)
+    
     const result = await usersCollection.find(query).toArray()
     res.send(result)
 
@@ -63,12 +89,22 @@ app.get('/orders',async(req,res)=>{
 // admin route
 app.get('/users/admin/:email', async (req, res) => {
     const email = req.params.email;
-    const query = { email }
+    const query = {email}
     const user = await usersCollection.findOne(query);
    const accountType = {accountType:user.accountType}
     
 
     res.send(accountType);
+})
+
+app.get('/seller/product/:email',  async (req, res)=>{
+    const email = req.params.email;
+    const query = {}
+    
+    const product = await productsCollection.find(query).toArray()
+    const userProduct =  product.filter(pd=>pd.sellerInfo.email===email)
+    
+    res.send(userProduct)
 })
 
 
@@ -153,6 +189,14 @@ app.post('/payments',async(req,res)=>{
 const updatedResult = await ordersCollection.insertOne(orders)
     
     res.send(result)
+})
+
+app.delete('/dashboard/user/delete/:email',  async (req, res) => {
+    const email = req.params.email;
+    const filter = {email:email};
+  
+    const result = await usersCollection.deleteOne(filter);
+    res.send(result);
 })
        
     }finally{
