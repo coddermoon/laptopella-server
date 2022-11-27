@@ -79,7 +79,8 @@ app.post('/users',async(req,res)=>{
 // find orders collection 
 
 app.get('/orders',async(req,res)=>{
-    const query = {}
+    const query = req.query
+    
     const result = await ordersCollection.find(query).toArray()
     res.send(result)
 
