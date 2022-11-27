@@ -43,13 +43,19 @@ const paymentsCollection = client.db('laptopella').collection('payment')
 const ordersCollection = client.db('laptopella').collection('orders')
 
 // json web token for secure my site 
-app.post('/jwt', (req, res) =>{
-    const user = req.body;
-    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d'})
-    console.log({token})
-   res.send({token})
+app.get('/jwt', async (req, res) => {
+    const email = req.query.email;
+    const query = { email: email };
+    const user = await usersCollection.findOne(query);
     
-})
+    if (user) {
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+        return res.send({ accessToken: token });
+    }
+    res.status(403).send({ accessToken: '' })
+});
+
+
 
 // handle users collection
 
