@@ -16,7 +16,9 @@ const uri = process.env.DB_URL
 // connection mongodb 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 // jsonWeb token verify
-const  verifyJWT=(req, res, next)=> {
+
+
+function verifyJWT(req, res, next) {
 
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -99,7 +101,8 @@ app.get('/users/admin/:email', async (req, res) => {
     const query = {email}
     const user = await usersCollection.findOne(query);
    const accountType = {accountType:user.accountType}
-    
+
+   
 
     res.send(accountType);
 })
