@@ -87,7 +87,7 @@ app.post('/users',async(req,res)=>{
 app.post('/wishlist',async(req,res)=>{
     const wishlist = req.body
     const result =await wishlistCollection.insertOne(wishlist)
-    console.log(result)
+    
     res.send(result)
 
 
@@ -117,17 +117,20 @@ app.get('/orders',async(req,res)=>{
 
 app.get('/wishlist',async(req,res)=>{
     const email = req.query.email
+    const limit = parseInt(req.query.limit)
+    console.log(limit)
     
-    const query = {}
+    const query = {email}
     
-    const result = await wishlistCollection.find(query).toArray()
-    const categoriesData = result.filter(product=>product.sellerInfo.email===email )
+    const result = await wishlistCollection.find(query).limit(!limit ? 0: limit).toArray()
+  
    
     
-    res.send(categoriesData)
+    res.send(result)
 
 
 })
+
 
 // admin route
 app.get('/users/admin/:email', async (req, res) => {
