@@ -123,6 +123,7 @@ app.get('/wishlist',async(req,res)=>{
     const result = await wishlistCollection.find(query).toArray()
     const categoriesData = result.filter(product=>product.sellerInfo.email===email )
    
+    
     res.send(categoriesData)
 
 
