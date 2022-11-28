@@ -43,6 +43,7 @@ const productsCollection = client.db('laptopella').collection('products')
 const usersCollection = client.db('laptopella').collection('users')
 const paymentsCollection = client.db('laptopella').collection('payment')
 const ordersCollection = client.db('laptopella').collection('orders')
+const wishlistCollection = client.db('laptopella').collection('wishlist')
 
 // json web token for secure my site 
 app.get('/jwt', async (req, res) => {
@@ -83,6 +84,24 @@ app.post('/users',async(req,res)=>{
 
    
 })
+app.post('/wishlist',async(req,res)=>{
+    const wishlist = req.body
+    const result =await wishlistCollection.insertOne(wishlist)
+    console.log(result)
+    res.send(result)
+
+
+   
+})
+
+app.post('/products',async(req,res)=>{
+    const product = req.body
+    const result =await productsCollection.insertOne(product)
+    res.send(result)
+
+
+   
+})
 
 // find orders collection 
 
@@ -91,6 +110,20 @@ app.get('/orders',async(req,res)=>{
     
     const result = await ordersCollection.find(query).toArray()
     res.send(result)
+
+
+})
+
+
+app.get('/wishlist',async(req,res)=>{
+    const email = req.query.email
+    
+    const query = {}
+    
+    const result = await wishlistCollection.find(query).toArray()
+    const categoriesData = result.filter(product=>product.sellerInfo.email===email )
+   
+    res.send(categoriesData)
 
 
 })
@@ -139,7 +172,7 @@ app.get(`/category`,async(req,res)=>{
     
     const query = {}
     const products = await productsCollection.find(query).toArray()
-    const categoriesData = products.map(product=>product.productInfo.brand)
+    const categoriesData = products.map(product=>product.productInfo.brand.toLowerCase())
 
    res.send(categoriesData)
     
